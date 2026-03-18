@@ -26,7 +26,8 @@ const imgfile = [
 "img/GameStart/numbers/8.png",          //21
 "img/GameStart/numbers/9.png",          //22
 "img/GameStart/Score.png"    ,          //23
-"img/GameStart/Next.png"               //24
+"img/GameStart/Next.png"   ,          //24
+"img/GameStart/Cloud.png"              //25
 ];
 
 /// img onload

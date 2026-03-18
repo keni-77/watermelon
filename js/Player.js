@@ -23,10 +23,28 @@ class Player {
   }
  }
  draw(){
+  // 1. 古い雲の棒（クレーン）の描画（一番背面）
   ctx.drawImage(img[11], this.x, this.y, 12, 960);
-  // canDrop が true（次を落とせる状態）の時だけ持ち手フルーツを表示
+  
+  // 2. 雲の画像(Cloud.png)をキャンバス上に描画（棒の少し左、少し上に大きめに配置）
+  // 以前のy-65から y-110 まで上に引き上げる（フルーツより背面になるよう先に描画）
+  if(img[25]) {
+    ctx.drawImage(img[25], this.x - 210, this.y - 110, 200, 140);
+  }
+
+  // 3. 持ち手フルーツを描画（雲の後から描画することで前面に表示される）
+  let radius = 40*(1.25 ** now);
   if(canDrop){
-   ctx.drawImage(img[now-1], this.x -40*(1.25 ** now), this.y -40*(1.25 ** now), 40*(1.25 ** now) *2, 40*(1.25 ** now) *2);
+   ctx.drawImage(img[now-1], this.x -radius, this.y -radius, radius *2, radius *2);
+  }
+
+  // ポーズ用の透明なdiv（#pauseToggleBtn）の位置も、画像に合わせて上にずらす
+  const pauseBtn = document.getElementById('pauseToggleBtn');
+  if(pauseBtn) {
+    pauseBtn.style.left = (this.x - 210) + 'px'; 
+    pauseBtn.style.top = (this.y - 110) + 'px';
+    pauseBtn.style.width = '200px';
+    pauseBtn.style.height = '140px';
   }
  }
 }

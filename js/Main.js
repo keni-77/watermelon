@@ -19,6 +19,7 @@ const homeBtn = document.getElementById('homeBtn');
 const pauseScreen = document.getElementById('pauseScreen');
 const resumeBtn = document.getElementById('resumeBtn');
 const pauseHomeBtn = document.getElementById('pauseHomeBtn');
+const pauseToggleBtn = document.getElementById('pauseToggleBtn');
 
 document.addEventListener('keydown', (e) => {
     // ゲームプレイ中かつゲームオーバーでない場合、Escキーでポーズ切り替え
@@ -45,6 +46,16 @@ pauseHomeBtn.addEventListener('click', () => {
 startBtn.addEventListener('click', () => {
     isPlaying = true;
     homeScreen.style.display = 'none';
+    pauseToggleBtn.style.display = 'block';
+});
+
+pauseToggleBtn.addEventListener('click', () => {
+    if (isPlaying && !gameover) {
+        if (!isPaused) {
+            isPaused = true;
+            pauseScreen.style.display = 'flex';
+        }
+    }
 });
 
 howToPlayBtn.addEventListener('click', () => {
@@ -75,6 +86,7 @@ retryBtn.addEventListener('click', () => {
     // UIを隠す（ゲーム画面へ戻る）
     gameOverScreen.style.display = 'none';
     pauseScreen.style.display = 'none';
+    pauseToggleBtn.style.display = 'block';
 });
 
 homeBtn.addEventListener('click', () => {
@@ -116,6 +128,7 @@ for(let i = 0; i < s.length; i++){
 
 k++
 }else {
+    pauseToggleBtn.style.display = 'none';
     if (!isGameOverScreenShown) {
         isGameOverScreenShown = true;
         gameOverScreen.style.display = 'flex';
