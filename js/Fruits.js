@@ -15,26 +15,30 @@ class Fruits {
  }
  update(){
   this.vy += gravity
+  
+  let leftWall = layout.boxLeft + 20;
+  let rightWall = layout.boxRight - 20;
+  
   if(
-  this.x <= 620  +this.r ||
-  this.x >= 1300 -this.r
+  this.x <= leftWall  +this.r ||
+  this.x >= rightWall -this.r
   ){
-  this.x = Math.max(620 + this.r ,Math.min(this.x ,1300 - this.r))
+  this.x = Math.max(leftWall + this.r ,Math.min(this.x ,rightWall - this.r))
   this.vx *= -0.2
   }
   
-  // ゲームオーバー判定の緩和（猶予期間）
-  if(this.y <= 100 + this.r && this.hit){
+  if(this.y <= layout.spawnY + this.r && this.hit){
     if(!this.dangerTimer) this.dangerTimer = 0;
-    this.dangerTimer += 1/60; // 60fpsと想定
-    if(this.dangerTimer >= 3.0){ // 3秒経過でゲームオーバー
+    this.dangerTimer += 1/60; 
+    if(this.dangerTimer >= 3.0){ 
       gameover = true;
     }
   } else {
     this.dangerTimer = 0;
   }
 
-  if(this.y >= 1060 -this.r){
+  let floor = layout.boxBottom;
+  if(this.y >= floor -this.r){
    if (!this.hit && this === lastDropped) {
       if (!canDrop) {
         canDrop = true;
@@ -43,27 +47,23 @@ class Fruits {
       }
    }
    this.hit = true
-   this.y = Math.max(0 ,Math.min(this.y ,1060 -this.r))
+   this.y = Math.min(this.y ,floor -this.r)
    this.vy *= -0.1;
-   this.vx *=  0.98; // 摩擦を少なく (0.95 -> 0.98)
+   this.vx *=  0.98;
   }
   this.y  += this.vy; 
   this.x  += this.vx;
   
   this.rot += this.vx / ((2 *this.r) * Math.PI)
-  this.rot *= 0.85 // 回転の減衰を少なく (0.7 -> 0.85)
+  this.rot *= 0.85
   this.angle += this.rot
  }
-draw(){
+ draw(){
+  let size = 40*(1.25 ** this.level)
+  ctx.save()
+  ctx.translate(this.x , this.y)
+  ctx.rotate(this.angle)
 
- let size = 40*(1.25 ** this.level)
-
- ctx.save()
-
- ctx.translate(this.x , this.y)
- ctx.rotate(this.angle)
-
-  // 危険な状態(dangerTimer > 0)のときに赤く点滅させる
   if(this.dangerTimer > 0 && Math.floor(Date.now() / 200) % 2 === 0){
     ctx.globalCompositeOperation = "source-atop";
     ctx.fillStyle = "rgba(255, 0, 0, 0.5)";
@@ -71,17 +71,9 @@ draw(){
     ctx.globalCompositeOperation = "source-over";
   }
 
- ctx.drawImage(
-  img[this.level-1],
-  -size,
-  -size,
-  size*2,
-  size*2
- )
-
- ctx.restore()
-
-}
+  ctx.drawImage(img[this.level-1], -size, -size, size*2, size*2)
+  ctx.restore()
+ }
 }
 
 const fruits = [];

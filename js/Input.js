@@ -38,7 +38,50 @@ document.addEventListener("keyup", function(event) {
   case keysettings.Back  :
    keyup.Back = true  ;
   break;
-
-  
   }
+});
+
+// ポインター操作（タッチ・マウス共通）
+function updatePointerPos(event) {
+    const scale = Math.min(window.innerWidth / layout.canvasWidth, window.innerHeight / layout.canvasHeight);
+    pointerX = event.clientX / scale;
+}
+
+document.addEventListener("mousedown", function(event) {
+    if (event.target.id === "pauseToggleBtn" || event.target.closest("#ui")) return;
+    updatePointerPos(event);
+    key.isDragging = true;
+});
+
+document.addEventListener("mousemove", function(event) {
+    if (key.isDragging) {
+        updatePointerPos(event);
+    }
+});
+
+document.addEventListener("mouseup", function(event) {
+    if (key.isDragging) {
+        key.Enter = true;
+        key.isDragging = false;
+    }
+});
+
+document.addEventListener("touchstart", function(event) {
+    if (event.target.id === "pauseToggleBtn" || event.target.closest("#ui")) return;
+    updatePointerPos(event.touches[0]);
+    key.isDragging = true;
+}, { passive: false });
+
+document.addEventListener("touchmove", function(event) {
+    if (key.isDragging) {
+        updatePointerPos(event.touches[0]);
+        event.preventDefault();
+    }
+}, { passive: false });
+
+document.addEventListener("touchend", function(event) {
+    if (key.isDragging) {
+        key.Enter = true;
+        key.isDragging = false;
+    }
 });

@@ -1,52 +1,57 @@
 
 // Player.js //
 
-class Player {
- constructor() {
-  this.x     = 960 ;
-  this.y     = 100 ;
-  this.speed = 5  ;
+class Player{
+ constructor(){
+  this.x = 960; 
+  this.y = 100; 
+  this.speed = 7; // 速度を少し抑制 (10 -> 7)
+  this.targetX = 960; // スムーズな移動のための目標座標
  }
  update(){
-  if(key.Right   ) this.x += this.speed ;
-  if(key.Left    ) this.x -= this.speed ;
-  this.x = Math.max(620 +20*(1.25 ** now) , Math.min(this.x, 1300 -20*(1.25 ** now)));
-  if(key.Enter ){
-  key.Enter = false; // 連続発火を防ぐため消費する
-  if(canDrop){
-  canDrop = false;
-  let f = new Fruits(this.x + Math.random() *2 -1, this.y);
-  fruits.push(f);
-  lastDropped = f; // 最後に落としたフルーツを記録
-  // now と next はフルーツが着地・衝突・合体した時に更新する
+  this.y = layout.spawnY;
+
+  // キーボード移動
+  if(key.Right) this.targetX += this.speed ;
+  if(key.Left)  this.targetX -= this.speed ;
+  
+  // マウス/タッチ移動
+  if(key.isDragging){
+    this.targetX = pointerX;
   }
+
+  // 目標座標へ滑らかに近づける (Lerp)
+  // PCでのマウス操作でも「吸い付く」ような心地よい動きにします
+  this.x += (this.targetX - this.x) * 0.2;
+
+  // 範囲制限
+  let margin = 20 * (1.25 ** now);
+  this.x = Math.max(layout.boxLeft + margin , Math.min(this.x, layout.boxRight - margin));
+  
+  // targetXも制限内に収めておく
+  this.targetX = Math.max(layout.boxLeft + margin , Math.min(this.targetX, layout.boxRight - margin));
+
+  if(key.Enter ){
+    key.Enter = false;
+    if(canDrop){
+      canDrop = false;
+      let f = new Fruits(this.x, this.y); // 微妙なランダム性は一旦除去して精密操作を優先
+      fruits.push(f);
+      lastDropped = f;
+    }
   }
  }
  draw(){
-  // 1. 古い雲の棒（クレーン）の描画（一番背面）
-  ctx.drawImage(img[11], this.x, this.y, 12, 960);
+  // 棒の長さもレイアウトに合わせる
+  ctx.drawImage(img[11], this.x, this.y, 12, layout.boxBottom - layout.boxTop);
   
-  // 2. 雲の画像(Cloud.png)をキャンバス上に描画（棒の少し左、少し上に大きめに配置）
-  // 以前のy-65から y-110 まで上に引き上げる（フルーツより背面になるよう先に描画）
   if(img[25]) {
     ctx.drawImage(img[25], this.x - 210, this.y - 110, 200, 140);
   }
 
-  // 3. 持ち手フルーツを描画（雲の後から描画することで前面に表示される）
   let radius = 40*(1.25 ** now);
   if(canDrop){
    ctx.drawImage(img[now-1], this.x -radius, this.y -radius, radius *2, radius *2);
   }
-
-  // ポーズ用の透明なdiv（#pauseToggleBtn）の位置も、画像に合わせて上にずらす
-  const pauseBtn = document.getElementById('pauseToggleBtn');
-  if(pauseBtn) {
-    pauseBtn.style.left = (this.x - 210) + 'px'; 
-    pauseBtn.style.top = (this.y - 110) + 'px';
-    pauseBtn.style.width = '200px';
-    pauseBtn.style.height = '140px';
-  }
  }
 }
-
-const player = new Player();

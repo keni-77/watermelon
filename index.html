@@ -2,111 +2,169 @@
 <html lang="ja">
 
 <head>
-<meta charset="UTF-8">
-<title>Water Melon Game</title>
+    <meta charset="UTF-8">
+    <title>Water Melon Game</title>
 
-<style>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000;
+        }
 
-body{
- margin:0;
- overflow:hidden;
-}
+        #app {
+            transform-origin: top left;
+        }
 
-#app{
- transform-origin: top left;
-}
+        canvas {
+            display: block;
+        }
 
-canvas{
- display:block;
-}
+        #pauseToggleBtn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
 
-</style>
+        #pauseToggleBtn:active {
+            transform: scale(0.95);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+    </style>
+    
+    <!-- 1. 定数・グローバル変数を最初に読み込む -->
+    <script src="js/Globals.js"></script>
+    <script src="js/Input.js"></script>
+    <script src="js/Img.js"></script>
+    <script src="js/Fruits.js"></script>
+    <script src="js/Player.js"></script>
+    <script src="js/Hit.js"></script>
+    <script src="js/Main.js" defer></script> <!-- メインロジックは最後に実行 -->
 
 </head>
 
 <body>
 
-<div id="app">
-<canvas id="mycanvas"></canvas>
+    <div id="app">
+        <canvas id="mycanvas"></canvas>
 
-<!-- ポーズ切り替えボタン（透明な当たり判定として機能） -->
-<div id="pauseToggleBtn" style="display:none; position:absolute; pointer-events:auto; cursor:pointer; box-sizing:border-box;"></div>
+        <!-- ポーズ切り替えボタン（プレミアムデザイン） -->
+        <div id="pauseToggleBtn"
+            style="display:none; position:absolute; top:15px; right:15px; width:80px; height:80px; background: linear-gradient(135deg, #ffffff 0%, #f7f7f7 100%); border: 5px solid #ff9100; border-radius: 50%; cursor:pointer; display:flex; justify-content:center; align-items:center; font-size:40px; color:#ff9100; font-weight:bold; pointer-events:auto; z-index:100; box-shadow: 0 6px 12px rgba(0,0,0,0.2); transition: transform 0.1s, box-shadow 0.1s; user-select:none; font-family: Arial, sans-serif;">
+            <span style="transform: translateY(-2px); letter-spacing: 2px;">||</span>
+        </div>
 
-<div id="ui" style="position: absolute; top:0; left:0; width:1920px; height:1080px; pointer-events:none; display:flex; flex-direction:column; justify-content:center; align-items:center;">
-    <!-- ホーム画面 -->
-    <div id="homeScreen" style="display:flex; flex-direction:column; align-items:center;">
-        <div style="font-size: 150px; color: white; text-shadow: 6px 6px 0px #000, -6px -6px 0px #000, 6px -6px 0px #000, -6px 6px 0px #000; font-weight: bold; margin-bottom: 80px;">スイカゲーム</div>
-        <button id="startBtn" style="pointer-events:auto; font-size: 80px; padding: 20px 80px; cursor: pointer; border-radius: 40px; border: 8px solid #ff9100; background-color: #fff; color: #ff9100; font-weight: bold; box-shadow: 0 10px 20px rgba(0,0,0,0.5); transition: transform 0.1s;">始める</button>
-        <button id="howToPlayBtn" style="pointer-events:auto; font-size: 60px; padding: 15px 60px; margin-top: 30px; cursor: pointer; border-radius: 30px; border: 5px solid #ff9100; background-color: #fff; color: #ff9100; font-weight: bold; box-shadow: 0 10px 20px rgba(0,0,0,0.3); transition: transform 0.1s;">遊び方</button>
+        <div id="ui"
+            style="position: absolute; top:0; left:0; width:1920px; height:1080px; pointer-events:none; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+            <!-- ホーム画面 -->
+            <div id="homeScreen" style="display:flex; flex-direction:column; align-items:center;">
+                <div
+                    style="font-size: 150px; color: white; text-shadow: 6px 6px 0px #000, -6px -6px 0px #000, 6px -6px 0px #000, -6px 6px 0px #000; font-weight: bold; margin-bottom: 80px;">
+                    スイカゲーム</div>
+                <button id="startBtn"
+                    style="pointer-events:auto; font-size: 80px; padding: 20px 80px; cursor: pointer; border-radius: 40px; border: 8px solid #ff9100; background-color: #fff; color: #ff9100; font-weight: bold; box-shadow: 0 10px 20px rgba(0,0,0,0.5); transition: transform 0.1s;">始める</button>
+                <button id="howToPlayBtn"
+                    style="pointer-events:auto; font-size: 60px; padding: 15px 60px; margin-top: 30px; cursor: pointer; border-radius: 30px; border: 5px solid #ff9100; background-color: #fff; color: #ff9100; font-weight: bold; box-shadow: 0 10px 20px rgba(0,0,0,0.3); transition: transform 0.1s;">遊び方</button>
+            </div>
+
+            <!-- 遊び方画面 -->
+            <div id="howToPlayScreen"
+                style="display:none; position:absolute; flex-direction:column; align-items:center; background-color: rgba(255, 255, 255, 0.95); padding: 80px; border-radius: 40px; border: 10px solid #ff9100; box-shadow: 0 20px 50px rgba(0,0,0,0.6); pointer-events:auto; width: 1000px; text-align: center;">
+                <button id="closeHowToPlayBtn"
+                    style="position: absolute; top: 20px; right: 30px; font-size: 40px; background: none; border: none; cursor: pointer; color: #ff9100; font-weight: bold;">✕閉じる</button>
+                <div style="font-size: 80px; color: #ff9100; font-weight: bold; margin-bottom: 60px;">遊び方</div>
+                <div style="font-size: 55px; color: #333; font-weight: bold; line-height: 1.6;">
+                    A, Dキー で横移動<br>
+                    Enterキー で落とす
+                </div>
+            </div>
+
+            <!-- ゲームオーバー画面 -->
+            <div id="gameOverScreen"
+                style="display:none; flex-direction:column; align-items:center; background-color: rgba(255, 255, 255, 0.9); padding: 60px 100px; border-radius: 40px; border: 15px solid #ff9100; box-shadow: 0 20px 50px rgba(0,0,0,0.6); pointer-events:auto;">
+                <div style="font-size: 100px; color: #ff9100; font-weight: bold; margin-bottom: 20px;">ゲームオーバー</div>
+                <div id="scoreText" style="font-size: 60px; color: #333; font-weight: bold; margin-bottom: 60px;">スコア：0
+                </div>
+                <button id="retryBtn"
+                    style="font-size: 60px; padding: 20px 60px; cursor: pointer; border-radius: 30px; border: none; background-color: #ff9100; color: #fff; font-weight: bold; box-shadow: 0 10px 20px rgba(0,0,0,0.3); margin-bottom: 30px; width: 100%;">リトライ</button>
+                <button id="homeBtn"
+                    style="font-size: 50px; padding: 15px 60px; cursor: pointer; border-radius: 30px; border: 5px solid #ff9100; background-color: #fff; color: #ff9100; font-weight: bold; box-shadow: 0 10px 20px rgba(0,0,0,0.3); width: 100%;">ホームに戻る</button>
+            </div>
+
+            <!-- ポーズ画面 -->
+            <div id="pauseScreen"
+                style="display:none; position:absolute; flex-direction:column; justify-content:center; align-items:center; background-color: rgba(0, 0, 0, 0.7); width: 100%; height: 100%; pointer-events:auto; z-index: 10;">
+                <div
+                    style="background-color: rgba(255, 255, 255, 0.95); padding: 80px 120px; border-radius: 40px; border: 10px solid #ff9100; box-shadow: 0 20px 50px rgba(0,0,0,0.6); display:flex; flex-direction:column; align-items:center;">
+                    <div style="font-size: 80px; color: #ff9100; font-weight: bold; margin-bottom: 60px;">ポーズ</div>
+                    <button id="resumeBtn"
+                        style="font-size: 60px; padding: 20px 80px; margin-bottom: 30px; cursor: pointer; border-radius: 30px; border: none; background-color: #ff9100; color: #fff; font-weight: bold; box-shadow: 0 10px 20px rgba(0,0,0,0.3); transition: transform 0.1s; width: 100%;">再開する</button>
+                    <button id="pauseHomeBtn"
+                        style="font-size: 50px; padding: 15px 60px; cursor: pointer; border-radius: 30px; border: 5px solid #ff9100; background-color: #fff; color: #ff9100; font-weight: bold; box-shadow: 0 10px 20px rgba(0,0,0,0.3); transition: transform 0.1s; width: 100%;">タイトルへ戻る</button>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- 遊び方画面 -->
-    <div id="howToPlayScreen" style="display:none; position:absolute; flex-direction:column; align-items:center; background-color: rgba(255, 255, 255, 0.95); padding: 80px; border-radius: 40px; border: 10px solid #ff9100; box-shadow: 0 20px 50px rgba(0,0,0,0.6); pointer-events:auto; width: 1000px; text-align: center;">
-       <button id="closeHowToPlayBtn" style="position: absolute; top: 20px; right: 30px; font-size: 40px; background: none; border: none; cursor: pointer; color: #ff9100; font-weight: bold;">✕閉じる</button>
-       <div style="font-size: 80px; color: #ff9100; font-weight: bold; margin-bottom: 60px;">遊び方</div>
-       <div style="font-size: 55px; color: #333; font-weight: bold; line-height: 1.6;">
-          A, Dキー で横移動<br>
-          Enterキー で落とす
-       </div>
-    </div>
 
-    <!-- ゲームオーバー画面 -->
-    <div id="gameOverScreen" style="display:none; flex-direction:column; align-items:center; background-color: rgba(255, 255, 255, 0.9); padding: 60px 100px; border-radius: 40px; border: 15px solid #ff9100; box-shadow: 0 20px 50px rgba(0,0,0,0.6); pointer-events:auto;">
-       <div style="font-size: 100px; color: #ff9100; font-weight: bold; margin-bottom: 20px;">ゲームオーバー</div>
-       <div id="scoreText" style="font-size: 60px; color: #333; font-weight: bold; margin-bottom: 60px;">スコア：0</div>
-       <button id="retryBtn" style="font-size: 60px; padding: 20px 60px; cursor: pointer; border-radius: 30px; border: none; background-color: #ff9100; color: #fff; font-weight: bold; box-shadow: 0 10px 20px rgba(0,0,0,0.3); margin-bottom: 30px; width: 100%;">リトライ</button>
-       <button id="homeBtn" style="font-size: 50px; padding: 15px 60px; cursor: pointer; border-radius: 30px; border: 5px solid #ff9100; background-color: #fff; color: #ff9100; font-weight: bold; box-shadow: 0 10px 20px rgba(0,0,0,0.3); width: 100%;">ホームに戻る</button>
-    </div>
+    <script>
+        const canvas = document.getElementById("mycanvas");
+        const ctx = canvas.getContext("2d");
 
-    <!-- ポーズ画面 -->
-    <div id="pauseScreen" style="display:none; position:absolute; flex-direction:column; justify-content:center; align-items:center; background-color: rgba(0, 0, 0, 0.7); width: 100%; height: 100%; pointer-events:auto; z-index: 10;">
-       <div style="background-color: rgba(255, 255, 255, 0.95); padding: 80px 120px; border-radius: 40px; border: 10px solid #ff9100; box-shadow: 0 20px 50px rgba(0,0,0,0.6); display:flex; flex-direction:column; align-items:center;">
-           <div style="font-size: 80px; color: #ff9100; font-weight: bold; margin-bottom: 60px;">ポーズ</div>
-           <button id="resumeBtn" style="font-size: 60px; padding: 20px 80px; margin-bottom: 30px; cursor: pointer; border-radius: 30px; border: none; background-color: #ff9100; color: #fff; font-weight: bold; box-shadow: 0 10px 20px rgba(0,0,0,0.3); transition: transform 0.1s; width: 100%;">再開する</button>
-           <button id="pauseHomeBtn" style="font-size: 50px; padding: 15px 60px; cursor: pointer; border-radius: 30px; border: 5px solid #ff9100; background-color: #fff; color: #ff9100; font-weight: bold; box-shadow: 0 10px 20px rgba(0,0,0,0.3); transition: transform 0.1s; width: 100%;">タイトルへ戻る</button>
-       </div>
-    </div>
-</div>
-</div>
+        function resizeGame() {
+            // Globals.js が読み込まれてから判別可能
+            if (typeof isPortrait === 'undefined') return;
 
+            isPortrait = window.innerWidth < window.innerHeight;
 
-<script>
+            if (isPortrait) {
+                layout.canvasWidth = 1080;
+                layout.canvasHeight = 1920;
+                layout.boxLeft = 90;
+                layout.boxRight = 990;
+                layout.boxTop = 400;
+                layout.boxBottom = 1500;
+                layout.spawnY = 400;
+            } else {
+                layout.canvasWidth = 1920;
+                layout.canvasHeight = 1080;
+                layout.boxLeft = 600;
+                layout.boxRight = 1320;
+                layout.boxTop = 100;
+                layout.boxBottom = 1060;
+                layout.spawnY = 100;
+            }
 
-const canvas = document.getElementById("mycanvas");
-const ctx = canvas.getContext("2d");
+            const scaleX = window.innerWidth / layout.canvasWidth;
+            const scaleY = window.innerHeight / layout.canvasHeight;
+            const scale = Math.min(scaleX, scaleY);
 
-function resizeGame() {
-    const baseWidth = 1920;
-    const baseHeight = 1080;
+            const app = document.getElementById("app");
+            app.style.transform = `scale(${scale})`;
+            app.style.transformOrigin = "top left";
 
-    const scaleX = window.innerWidth / baseWidth;
-    const scaleY = window.innerHeight / baseHeight;
+            canvas.width = layout.canvasWidth;
+            canvas.height = layout.canvasHeight;
+            
+            const ui = document.getElementById("ui");
+            if(ui) {
+                ui.style.width = layout.canvasWidth + "px";
+                ui.style.height = layout.canvasHeight + "px";
+            }
+        }
 
-    // どちらか小さい方に合わせる
-    const scale = Math.min(scaleX, scaleY);
+        // 定期的にチェック（読み込み完了タイミングの保険）
+        function checkInit() {
+            if (typeof isPortrait !== 'undefined') {
+                resizeGame();
+            } else {
+                setTimeout(checkInit, 10);
+            }
+        }
 
-    const app = document.getElementById("app");
-    app.style.transform = `scale(${scale})`;
-    app.style.transformOrigin = "top left";
-
-    // canvas は固定サイズ（ゲームの基準解像度）
-    canvas.width = baseWidth;
-    canvas.height = baseHeight;
-}
-
-resizeGame();
-window.addEventListener("resize", resizeGame);
-
-</script>
-
-<script src="js/Globals.js"></script>
-<script src="js/Input.js"></script>
-<script src="js/Img.js"></script>
-<script src="js/Fruits.js"></script>
-<script src="js/Player.js"></script>
-<script src="js/Hit.js"></script>
-<script src="js/Main.js"></script>
-
+        checkInit();
+        window.addEventListener("resize", resizeGame);
+    </script>
 
 </body>
+
 </html>

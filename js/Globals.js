@@ -6,7 +6,8 @@ let key   = {
   Back  :false,
   Right :false,
   Left  :false,
-  Up    :false
+  Up    :false,
+  isDragging: false
 };
 let keyup = {
   Enter :false,
@@ -36,3 +37,16 @@ gameover = false;
 let canDrop = true;
 let lastDropped = null; // 最後に落としたフルーツを追跡
 let preventHoldEnter = false; // Enter押しっぱなし防止用
+let pointerX = 960; 
+
+// レスポンシブレイアウト管理用のオブジェクト
+let isPortrait = false;
+let layout = {
+  canvasWidth: 1920,
+  canvasHeight: 1080,
+  boxLeft: 600,
+  boxRight: 1320,
+  boxTop: 100,
+  boxBottom: 1060,
+  spawnY: 100
+};
