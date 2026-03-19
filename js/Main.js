@@ -109,6 +109,18 @@ player.update ();
 player.draw   ();
 fruits.forEach(f => f.update());
 fruits.forEach(f => f.draw());
+
+// 危険ライン(y=100)の描画
+let isDanger = fruits.some(f => f.dangerTimer > 0);
+ctx.beginPath();
+ctx.setLineDash([10, 10]);
+ctx.moveTo(600, 100);
+ctx.lineTo(1320, 100);
+ctx.strokeStyle = isDanger ? "red" : "rgba(255, 255, 255, 0.5)";
+ctx.lineWidth = 2;
+ctx.stroke();
+ctx.setLineDash([]); // ダッシュをリセット
+
 for (let i = 0; i < fruits.length; i++) {
   for (let j = i+1; j < fruits.length; j++) {
     Hit(fruits[i],fruits[j],j)
@@ -117,12 +129,29 @@ for (let i = 0; i < fruits.length; i++) {
 
 ctx.drawImage(img[24] ,1390 ,130 ,420 ,420)
 let nextR = 20 *(1.25 ** next);
+// 落とせる状態(canDrop)でない時は、ネクスト表示を半透明にする
+ctx.save();
+ctx.globalAlpha = canDrop ? 1.0 : 0.5;
 ctx.drawImage(img[next -1] ,1600 -nextR*2 ,340 -nextR*2,nextR *4 ,nextR *4)
+ctx.restore();
 
 ctx.drawImage(img[23] ,1390 ,630 ,420 ,420)
 let s = score.toString();
 for(let i = 0; i < s.length; i++){
   ctx.drawImage(img[13 + Number(s[i])], 1600 -(s.length/2)*30 +(i*30), 830, 30, 30);
+}
+
+// シンカの図（進化の順番）を右下に描画
+ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
+ctx.fillRect(1400, 960, 400, 80);
+for(let i = 0; i < 11; i++){
+  let size = 15;
+  ctx.drawImage(img[i], 1420 + i*33, 985, size*2, size*2);
+  if(i < 10) {
+    ctx.fillStyle = "white";
+    ctx.font = "20px Arial";
+    ctx.fillText("→", 1445 + i*33, 1005);
+  }
 }
 
 

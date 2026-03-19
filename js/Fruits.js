@@ -22,12 +22,18 @@ class Fruits {
   this.x = Math.max(620 + this.r ,Math.min(this.x ,1300 - this.r))
   this.vx *= -0.2
   }
-  if(
-  this.y <= 100 +this.r &&
-  this.hit
-  ){
-   gameover = true;
+  
+  // ゲームオーバー判定の緩和（猶予期間）
+  if(this.y <= 100 + this.r && this.hit){
+    if(!this.dangerTimer) this.dangerTimer = 0;
+    this.dangerTimer += 1/60; // 60fpsと想定
+    if(this.dangerTimer >= 3.0){ // 3秒経過でゲームオーバー
+      gameover = true;
+    }
+  } else {
+    this.dangerTimer = 0;
   }
+
   if(this.y >= 1060 -this.r){
    if (!this.hit && this === lastDropped) {
       if (!canDrop) {
@@ -56,6 +62,14 @@ draw(){
 
  ctx.translate(this.x , this.y)
  ctx.rotate(this.angle)
+
+  // 危険な状態(dangerTimer > 0)のときに赤く点滅させる
+  if(this.dangerTimer > 0 && Math.floor(Date.now() / 200) % 2 === 0){
+    ctx.globalCompositeOperation = "source-atop";
+    ctx.fillStyle = "rgba(255, 0, 0, 0.5)";
+    ctx.fillRect(-size, -size, size*2, size*2);
+    ctx.globalCompositeOperation = "source-over";
+  }
 
  ctx.drawImage(
   img[this.level-1],

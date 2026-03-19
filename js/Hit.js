@@ -24,90 +24,78 @@ function Hit(a,b,c){
      }
   }
   
-  if(a.level === b.level){
-   score += 2 ** (a.level - 1)
-   console.log(score);
-   a.level += 1;
-   a.r = 20 * (1.25 ** a.level);
-   let mx = (a.x + b.x)/2;
-   let my = (a.y + b.y)/2;
-   a.x = mx;
-   a.y = my;
-   a.vx = 0;
-   a.vy = 0;
-   a.hit = false; // 合体直後は「未接触」扱い
-   fruits.splice(c ,1);
+   if(a.level === b.level){
+    // スイカ（レベル11）同士の合体
+    if(a.level === 11){
+      score += 1000;
+      // 両方のスイカを削除する
+      // b(インデックスc)を先に削除
+      fruits.splice(c, 1);
+      // aも削除する必要がある。aは呼び出し側のループのインデックスiに対応する
+      // aを削除可能にするために、特殊なフラグを立てるか、直接fruitsから探して削除する
+      let aIndex = fruits.indexOf(a);
+      if(aIndex !== -1) fruits.splice(aIndex, 1);
+      
+      // 合体エフェクトとしての衝撃波（周囲を強く吹き飛ばす）
+      let mx = (a.x + b.x) / 2;
+      let my = (a.y + b.y) / 2;
+      for(let f of fruits){
+        let pdx = f.x - mx;
+        let pdy = f.y - my;
+        let pdist = Math.sqrt(pdx * pdx + pdy * pdy);
+        if(pdist < 300 && pdist > 0){
+          let pushPower = (1 - pdist / 300) * 20;
+          f.vx += (pdx / pdist) * pushPower;
+          f.vy += (pdy / pdist) * pushPower;
+        }
+      }
+      return; // 合体完了
+    }
 
-   // 合体時にも次を落とせるようにする
-   if (!canDrop) {
-     canDrop = true;
-     now = next;
-     next = Math.floor(Math.random()*5) +1;
-   }
+    score += 2 ** (a.level - 1)
+    a.level += 1;
+    a.r = 20 * (1.25 ** a.level);
+    let mx = (a.x + b.x)/2;
+    let my = (a.y + b.y)/2;
+    a.x = mx;
+    a.y = my;
+    a.vx = 0;
+    a.vy = 0;
+    a.hit = false; // 合体直後は「未接触」扱い
+    fruits.splice(c ,1);
 
-   // 合体後のフルーツと重なっているフルーツを処理
-   let chainMerge = true;
-   while(chainMerge){
-    chainMerge = false;
-    for(let i = 0; i < fruits.length; i++){
-     let f = fruits[i];
-     if(f === a) continue;
-     let pdx = f.x - a.x;
-     let pdy = f.y - a.y;
-     let pdist = Math.sqrt(pdx * pdx + pdy * pdy);
-     let overlap = (a.r + f.r) - pdist;
-     if(overlap > 0 && pdist > 0){
-      if(f.level === a.level){
-       // 同じレベルなら連鎖合体
-       score += 2 ** (a.level - 1);
-       console.log(score);
-       a.level += 1;
-       a.r = 20 * (1.25 ** a.level);
-       a.x = (a.x + f.x)/2;
-       a.y = (a.y + f.y)/2;
-       a.vx = 0;
-       a.vy = 0;
-       fruits.splice(i, 1);
-       chainMerge = true; // もう一度チェック
-       break;
-      }else{
-        // 違う種類なら押し出す（めり込み具合に応じて吹き飛ばしを強化）
+    // 合体時にも次を落とせるようにする
+    if (!canDrop) {
+      canDrop = true;
+      now = next;
+      next = Math.floor(Math.random()*5) +1;
+    }
+
+    // 合体時の「バースト」効果：周囲のフルーツを少しだけ弾き飛ばす
+    for(let f of fruits){
+      if(f === a) continue;
+      let pdx = f.x - a.x;
+      let pdy = f.y - a.y;
+      let pdist = Math.sqrt(pdx * pdx + pdy * pdy);
+      // 合体後のフルーツの半径の2倍以内の距離にあるものを対象
+      let range = a.r * 2.5;
+      if(pdist < range && pdist > 0){
+        let overlap = (a.r + f.r) - pdist;
         let pnx = pdx / pdist;
         let pny = pdy / pdist;
-        f.x += pnx * overlap;
-        f.y += pny * overlap;
         
-        // めり込み率 (overlap / a.r) に応じて吹き飛ばし強度を決定
-        let pushPower = (overlap / a.r) * 15; 
+        // 押し出し強度
+        let pushPower = (overlap > 0) ? (overlap / a.r) * 15 : (1 - pdist/range) * 5;
         f.vx += pnx * pushPower;
         f.vy += pny * pushPower;
 
-        // 【追加】壁や他のフルーツを介して進行方向が塞がっている場合の反動
-        let isPinned = (f.x <= 620 + f.r && pnx < 0) || (f.x >= 1300 - f.r && pnx > 0);
-        if (!isPinned) {
-          // 他のフルーツとの接触によるピン留めチェック
-          for (let target of fruits) {
-            if (target === f || target === a) continue;
-            let tdx = target.x - f.x;
-            let tdy = target.y - f.y;
-            let tdist = Math.sqrt(tdx * tdx + tdy * tdy);
-            if (tdist < f.r + target.r) {
-              // そのフルーツが壁に当たっているかチェック
-              if ((target.x <= 620 + target.r && pnx < 0) || (target.x >= 1300 - target.r && pnx > 0)) {
-                isPinned = true;
-                break;
-              }
-            }
-          }
+        // 壁や他フルーツに挟まれている場合の反動
+        if (overlap > 0) {
+          f.x += pnx * overlap * 0.5;
+          f.y += pny * overlap * 0.5;
         }
-        if (isPinned) {
-          a.vx -= pnx * pushPower * 0.8; 
-          a.vy -= pny * pushPower * 0.8;
-        }
-       }
-     }
+      }
     }
-   }
   }else{
    a.hit = true ;
    b.hit = true ;
@@ -121,7 +109,7 @@ function Hit(a,b,c){
    // 近づいている場合のみ衝突応答
    if(dot < 0){
     let impulse = (-(1 + e) * dot) / (1/massA + 1/massB)
-    impulse *= 1.2; // 衝突の反応を1.2倍に強化して「硬さ」を出す
+    impulse *= 1.1; // 反応を少し抑えめに (1.2 -> 1.1)
     a.vx += (impulse / massA) * nx
     a.vy += (impulse / massA) * ny
     b.vx -= (impulse / massB) * nx
