@@ -1,9 +1,9 @@
 function Hit(a,b,c){
 
- let r = a.r + b.r
- let e = 0.3; // 反発係数（0.3 = 少し弾む、元の-2だとほぼ弾まない）
- let massA = 1.1 ** a.level + 1
- let massB = 1.1 ** b.level + 1
+  let r = a.r + b.r
+  let e = 0.45; // 反発係数（0.3 -> 0.45 に強化）
+  let massA = 1.05 ** a.level + 0.5 // 質量を軽く調整 (1.1 -> 1.05)
+  let massB = 1.05 ** b.level + 0.5
  let dx = a.x - b.x;
  let dy = a.y - b.y;
  let dist = Math.sqrt(dx ** 2 + dy ** 2);
@@ -71,14 +71,40 @@ function Hit(a,b,c){
        chainMerge = true; // もう一度チェック
        break;
       }else{
-       // 違う種類なら押し出す
-       let pnx = pdx / pdist;
-       let pny = pdy / pdist;
-       f.x += pnx * overlap;
-       f.y += pny * overlap;
-       f.vx += pnx * 2;
-       f.vy += pny * 2;
-      }
+        // 違う種類なら押し出す（めり込み具合に応じて吹き飛ばしを強化）
+        let pnx = pdx / pdist;
+        let pny = pdy / pdist;
+        f.x += pnx * overlap;
+        f.y += pny * overlap;
+        
+        // めり込み率 (overlap / a.r) に応じて吹き飛ばし強度を決定
+        let pushPower = (overlap / a.r) * 15; 
+        f.vx += pnx * pushPower;
+        f.vy += pny * pushPower;
+
+        // 【追加】壁や他のフルーツを介して進行方向が塞がっている場合の反動
+        let isPinned = (f.x <= 620 + f.r && pnx < 0) || (f.x >= 1300 - f.r && pnx > 0);
+        if (!isPinned) {
+          // 他のフルーツとの接触によるピン留めチェック
+          for (let target of fruits) {
+            if (target === f || target === a) continue;
+            let tdx = target.x - f.x;
+            let tdy = target.y - f.y;
+            let tdist = Math.sqrt(tdx * tdx + tdy * tdy);
+            if (tdist < f.r + target.r) {
+              // そのフルーツが壁に当たっているかチェック
+              if ((target.x <= 620 + target.r && pnx < 0) || (target.x >= 1300 - target.r && pnx > 0)) {
+                isPinned = true;
+                break;
+              }
+            }
+          }
+        }
+        if (isPinned) {
+          a.vx -= pnx * pushPower * 0.8; 
+          a.vy -= pny * pushPower * 0.8;
+        }
+       }
      }
     }
    }
@@ -95,6 +121,7 @@ function Hit(a,b,c){
    // 近づいている場合のみ衝突応答
    if(dot < 0){
     let impulse = (-(1 + e) * dot) / (1/massA + 1/massB)
+    impulse *= 1.2; // 衝突の反応を1.2倍に強化して「硬さ」を出す
     a.vx += (impulse / massA) * nx
     a.vy += (impulse / massA) * ny
     b.vx -= (impulse / massB) * nx

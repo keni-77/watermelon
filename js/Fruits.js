@@ -39,13 +39,13 @@ class Fruits {
    this.hit = true
    this.y = Math.max(0 ,Math.min(this.y ,1060 -this.r))
    this.vy *= -0.1;
-   this.vx *=  0.95; 
+   this.vx *=  0.98; // 摩擦を少なく (0.95 -> 0.98)
   }
   this.y  += this.vy; 
   this.x  += this.vx;
   
   this.rot += this.vx / ((2 *this.r) * Math.PI)
-  this.rot *= 0.7
+  this.rot *= 0.85 // 回転の減衰を少なく (0.7 -> 0.85)
   this.angle += this.rot
  }
 draw(){
