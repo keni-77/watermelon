@@ -4,7 +4,7 @@
 class Fruits {
  constructor(x, y) {
   this.level = now ;
-  this.r  = 20*(1.25 ** now);
+  this.r  = (20 * layout.fruitScale) * (1.25 ** now);
   this.x     = x;
   this.y     = y;
   this.vx    = 0   ;
@@ -59,7 +59,7 @@ class Fruits {
   this.angle += this.rot
  }
  draw(){
-  let size = 40*(1.25 ** this.level)
+  let size = (40 * layout.fruitScale) * (1.25 ** this.level)
   ctx.save()
   ctx.translate(this.x , this.y)
   ctx.rotate(this.angle)

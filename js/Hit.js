@@ -54,7 +54,7 @@ function Hit(a,b,c){
 
     score += 2 ** (a.level - 1)
     a.level += 1;
-    a.r = 20 * (1.25 ** a.level);
+    a.r = (20 * layout.fruitScale) * (1.25 ** a.level);
     let mx = (a.x + b.x)/2;
     let my = (a.y + b.y)/2;
     a.x = mx;

@@ -133,7 +133,7 @@ for (let i = 0; i < fruits.length; i++) {
 if (isPortrait) {
     // スマホ用 (1080x1920)
     ctx.drawImage(img[24] ,680 ,50 ,350 ,350)
-    let nextR = 20 *(1.25 ** next);
+    let nextR = (20 * layout.fruitScale) * (1.25 ** next);
     ctx.save();
     ctx.globalAlpha = canDrop ? 1.0 : 0.5;
     ctx.drawImage(img[next -1] ,855 -nextR*2 ,225 -nextR*2,nextR *4 ,nextR *4)
@@ -159,7 +159,7 @@ if (isPortrait) {
 } else {
     // PC用 (1920x1080)
     ctx.drawImage(img[24] ,1410 ,100 ,380 ,380)
-    let nextR = 20 *(1.25 ** next);
+    let nextR = (20 * layout.fruitScale) * (1.25 ** next);
     ctx.save();
     ctx.globalAlpha = canDrop ? 1.0 : 0.5;
     ctx.drawImage(img[next -1] ,1600 -nextR*2 ,290 -nextR*2,nextR *4 ,nextR *4)

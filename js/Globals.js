@@ -48,5 +48,6 @@ let layout = {
   boxRight: 1320,
   boxTop: 100,
   boxBottom: 1060,
-  spawnY: 100
+  spawnY: 100,
+  fruitScale: 1.0 // デバイスごとのフルーツのスケーリング
 };

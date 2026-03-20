@@ -49,7 +49,7 @@ class Player{
     ctx.drawImage(img[25], this.x - 210, this.y - 110, 200, 140);
   }
 
-  let radius = 40*(1.25 ** now);
+  let radius = (40 * layout.fruitScale) * (1.25 ** now);
   if(canDrop){
    ctx.drawImage(img[now-1], this.x -radius, this.y -radius, radius *2, radius *2);
   }
