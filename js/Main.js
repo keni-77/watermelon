@@ -98,6 +98,13 @@ homeBtn.addEventListener('click', () => {
     location.reload(); 
 });
 
+// 前回（メモリ上）のランキングを表示（読み込み中は「読み込み中...」が出る）
+document.getElementById('homeRanking').innerHTML = Ranking.getDisplayHTML();
+// 非同期で最新を取得して更新
+Ranking.load().then(() => {
+    document.getElementById('homeRanking').innerHTML = Ranking.getDisplayHTML();
+});
+
 function Start(){
 if(!isPlaying) {
     ctx.fillStyle = "#ff9100";
@@ -189,8 +196,17 @@ k++
     pauseToggleBtn.style.display = 'none';
     if (!isGameOverScreenShown) {
         isGameOverScreenShown = true;
+        
+        // スコア表示を先に
         gameOverScreen.style.display = 'flex';
         scoreText.innerText = 'スコア：' + score;
+        document.getElementById('gameOverRanking').innerHTML = Ranking.getDisplayHTML("スコア送信中...");
+        
+        // ランキング保存と表示（非同期）
+        Ranking.saveScore(score).then(() => {
+            document.getElementById('gameOverRanking').innerHTML = Ranking.getDisplayHTML("本日の世界ハイスコア");
+            document.getElementById('homeRanking').innerHTML = Ranking.getDisplayHTML(); 
+        });
     }
 }
 

@@ -31,8 +31,12 @@
         }
     </style>
     
+    <!-- Supabase SDK (Serverless DB) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <!-- 1. 定数・グローバル変数を最初に読み込む -->
     <script src="js/Globals.js"></script>
+    <script src="js/Ranking.js"></script>
     <script src="js/Input.js"></script>
     <script src="js/Img.js"></script>
     <script src="js/Fruits.js"></script>
@@ -61,9 +65,12 @@
                     style="font-size: 150px; color: white; text-shadow: 6px 6px 0px #000, -6px -6px 0px #000, 6px -6px 0px #000, -6px 6px 0px #000; font-weight: bold; margin-bottom: 80px;">
                     スイカゲーム</div>
                 <button id="startBtn"
-                    style="pointer-events:auto; font-size: 80px; padding: 20px 80px; cursor: pointer; border-radius: 40px; border: 8px solid #ff9100; background-color: #fff; color: #ff9100; font-weight: bold; box-shadow: 0 10px 20px rgba(0,0,0,0.5); transition: transform 0.1s;">始める</button>
+                    style="pointer-events:auto; font-size: 80px; padding: 20px 80px; cursor: pointer; border-radius: 40px; border: 8px solid #ff9100; background-color: #fff; color: #ff9100; font-weight: bold; box-shadow: 0 10px 20px rgba(0,0,0,0.5); transition: transform 0.1s; margin-bottom: 20px;">始める</button>
                 <button id="howToPlayBtn"
-                    style="pointer-events:auto; font-size: 60px; padding: 15px 60px; margin-top: 30px; cursor: pointer; border-radius: 30px; border: 5px solid #ff9100; background-color: #fff; color: #ff9100; font-weight: bold; box-shadow: 0 10px 20px rgba(0,0,0,0.3); transition: transform 0.1s;">遊び方</button>
+                    style="pointer-events:auto; font-size: 60px; padding: 15px 60px; margin-top: 10px; cursor: pointer; border-radius: 30px; border: 5px solid #ff9100; background-color: #fff; color: #ff9100; font-weight: bold; box-shadow: 0 10px 20px rgba(0,0,0,0.3); transition: transform 0.1s;">遊び方</button>
+                
+                <!-- ランキング表示エリア（タイトル） -->
+                <div id="homeRanking" style="margin-top: 40px; pointer-events:auto;"></div>
             </div>
 
             <!-- 遊び方画面 -->
@@ -82,8 +89,11 @@
             <div id="gameOverScreen"
                 style="display:none; flex-direction:column; align-items:center; background-color: rgba(255, 255, 255, 0.9); padding: 60px 100px; border-radius: 40px; border: 15px solid #ff9100; box-shadow: 0 20px 50px rgba(0,0,0,0.6); pointer-events:auto;">
                 <div style="font-size: 100px; color: #ff9100; font-weight: bold; margin-bottom: 20px;">ゲームオーバー</div>
-                <div id="scoreText" style="font-size: 60px; color: #333; font-weight: bold; margin-bottom: 60px;">スコア：0
-                </div>
+                <div id="scoreText" style="font-size: 60px; color: #333; font-weight: bold; margin-bottom: 40px;">スコア：0</div>
+                
+                <!-- ランキング表示エリア（ゲームオーバー） -->
+                <div id="gameOverRanking" style="margin-bottom: 40px;"></div>
+
                 <button id="retryBtn"
                     style="font-size: 60px; padding: 20px 60px; cursor: pointer; border-radius: 30px; border: none; background-color: #ff9100; color: #fff; font-weight: bold; box-shadow: 0 10px 20px rgba(0,0,0,0.3); margin-bottom: 30px; width: 100%;">リトライ</button>
                 <button id="homeBtn"
